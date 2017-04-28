@@ -9,6 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.ActionBar;
@@ -167,6 +168,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                PackageInfo packageInfo = inpg.get(i);
+                final String packageName = packageInfo.packageName;
+                String appName = packageInfo.applicationInfo.loadLabel(packageManager).toString();
+
+
+                builder.setTitle("是否卸载"+appName+"?")
+                        .setPositiveButton("卸载", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(packageName);
+                                if(launchIntentForPackage==null){
+                                    Toast.makeText(MainActivity.this, "卸载后果很严重！还是别！", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                Intent intent = new Intent();
+                                intent.setAction(Intent.ACTION_DELETE);
+                                intent.setData(Uri.parse("package:"+packageName));
+                                startActivity(intent);
+
+                            }
+                        })
+                        .setNegativeButton("取消",null)
+                        .show();
+
+
+                return true;
+            }
+        });
+
 
     }
 
@@ -213,8 +249,8 @@ public class MainActivity extends AppCompatActivity {
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             String appName = applicationInfo.loadLabel(packageManager).toString();
             Drawable drawable = applicationInfo.loadIcon(packageManager);
-            helper.setText(R.id.tv_app_name, "应用名称：" + appName)
-                    .setText(R.id.tv_package_name, "报名" + packageName)
+            helper.setText(R.id.tv_app_name, "app_name：\n" + appName)
+                    .setText(R.id.tv_package_name, "packagename：\n" + packageName)
                     .setImageDrawable(R.id.iv_icon, drawable);
 
 
